@@ -3,93 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Интерактивное Портфолио</title>
+    <title>Архитектура Интерфейса / Портфолио</title>
     <link rel="stylesheet" href="1.css">
-    
-
-    <style>
-        
-    </style>
 </head>
 <body>
 
-    <!-- Элементы кастомного курсора -->
-    <div id="custom-cursor"></div>
-    <div id="custom-cursor-blur"></div>
+    <canvas id="network-canvas"></canvas>
 
-    <div class="container">
-        <!-- Шапка -->
-        <header>
-            <div class="logo">PORTFOLIO.EXE</div>
-            <div style="color: var(--text-muted); font-size: 0.9rem;">ВЕРСИЯ 2026</div>
+    <div class="cyber-grid"></div>
+
+    <div id="reticle"></div>
+
+    <div class="interface-wrapper">
+        <header class="nav-container">
+            <div class="sys-logo" data-glitch="CORE_SYSTEM_v2.6">CORE_SYSTEM_v2.6</div>
+            <div class="sys-status">
+                <span class="status-indicator"></span>
+                <span id="telemetry-status">STATUS: OPERATIONAL</span>
+            </div>
         </header>
 
-        <!-- Основная сетка -->
-        <div class="grid-layout">
+        <main class="bento-container">
             
-            <!-- Карточка 1: Приветствие (Печатный текст) -->
-            <div class="card wide" data-tilt>
-                <div class="card-glow"></div>
-                <h3 class="typing-text" id="typing-hero">Привет, это сайт обо мне</h3>
-                <p>Здесь пока ничего нет, кроме продвинутых интерфейсных решений и визуального отклика на каждое твое действие. Двигай мышь, чтобы активировать физику элементов.</p>
-            </div>
+            <section class="bento-item wide-node" data-tilt>
+                <div class="scanner-line"></div>
+                <div class="node-header">[01 // ИНИЦИАЛИЗАЦИЯ]</div>
+                <h1 class="glitch-title">ПОРТФОЛИО РАЗРАБОТЧИКА</h1>
+                <p class="node-text">Интерфейс спроектирован по принципу сетевых узлов. Движение курсора деформирует геометрию фонового графа. Клик по интерактивным узлам запускает процесс декомпрессии данных.</p>
+            </section>
 
-            <!-- Карточка 2: Трекер мыши -->
-            <div class="card" id="motion-card" data-tilt>
-                <div class="card-glow"></div>
-                <h3>Дата-панель</h3>
-                <p>Эта карточка считывает положение твоего курсора в режиме реального времени.</p>
-                <div class="coord-display" id="coords">X: 0 | Y: 0</div>
-            </div>
-
-            <!-- Карточка 3: Раскрывающийся блок (Клик) -->
-            <div class="card high" id="expandable-card">
-                <div class="card-glow"></div>
-                <h3>Раскрывающийся блок</h3>
-                <p>Нажми на кнопку ниже, чтобы изменить структуру сетки и развернуть скрытый контент с плавной CSS-анимацией.</p>
-                <div class="expandable-content">
-                    <p style="color: var(--text-primary);">Скрытая секция успешно инициализирована. Здесь можно разместить подробную информацию, списки навыков или текстовое описание проектов.</p>
+            <section class="bento-item expandable-node" id="terminal-node">
+                <div class="node-header">[02 // ДЕКОМПРЕССИЯ ДАННЫХ]</div>
+                <h3>Модуль конфигурации</h3>
+                <p>Нажмите на узел для развертывания скрытых суб-структур интерфейса и изменения геометрии сетки.</p>
+                
+                <div class="hidden-payload">
+                    <div class="matrix-data">
+                        <div class="data-row"><span>KERNEL:</span> <span>x86_64_NODE</span></div>
+                        <div class="data-row"><span>BUFFER:</span> <span>STABLE_0x99</span></div>
+                        <div class="data-row"><span>RENDER:</span> <span>CANVAS_2D_OPTIMIZED</span></div>
+                    </div>
                 </div>
-                <button class="expand-btn" id="toggle-btn">Развернуть блок</button>
-            </div>
+                
+                <button class="action-trigger" id="trigger-expand">РАЗВЕРНУТЬ УЗЕЛ</button>
+            </section>
 
-            <!-- Карточка 4: Магнитный интерактив -->
-            <div class="card">
-                <div class="card-glow"></div>
-                <h3>Магнитный триггер</h3>
-                <p>Кнопка ниже притягивается к курсору, когда ты подводишь его близко.</p>
-                <div class="magnetic-wrap">
-                    <button class="magnetic-button" id="mag-btn">Наведи на меня</button>
+            <section class="bento-item" id="telemetry-node">
+                <div class="node-header">[03 // ТЕЛЕМЕТРИЯ]</div>
+                <h3>Вектор курсора</h3>
+                <p>Считывание девиации координат относительно центра экрана.</p>
+                <div class="vector-output">
+                    <div>X: <span id="vec-x">0.00</span></div>
+                    <div>Y: <span id="vec-y">0.00</span></div>
                 </div>
-            </div>
+            </section>
 
-            <!-- Карточка 5: Визуализатор кликов -->
-            <div class="card">
-                <div class="card-glow"></div>
-                <h3>Интерактивный эквалайзер</h3>
-                <p>Кликни по этой карточке, чтобы сгенерировать случайные уровни высоты для полос.</p>
-                <div class="bar-container" id="bar-input">
-                    <div class="bar"></div>
-                    <div class="bar"></div>
-                    <div class="bar"></div>
-                    <div class="bar"></div>
-                    <div class="bar"></div>
-                    <div class="bar"></div>
+            <section class="bento-item high-node" id="matrix-node">
+                <div class="node-header">[04 // ЧАСТОТНЫЙ МОНИТОР]</div>
+                <h3>Анализатор активности</h3>
+                <p>Кликните в любую точку этой панели для генерации импульсных волн.</p>
+                <div class="impulse-container">
+                    <div class="impulse-bar"></div>
+                    <div class="impulse-bar"></div>
+                    <div class="impulse-bar"></div>
+                    <div class="impulse-bar"></div>
+                    <div class="impulse-bar"></div>
                 </div>
-            </div>
+            </section>
 
-            <!-- Карточка 6: Полноширинный подвал -->
-            <div class="card full" data-tilt>
-                <div class="card-glow"></div>
-                <h3>Минимализм и функционал</h3>
-                <p>Каждый элемент интерфейса реагирует на действия пользователя. Использование полной палитры серых оттенков позволяет сохранить строгий стиль, не перегружая визуальное восприятие цветом, делая акцент исключительно на микро-взаимодействиях.</p>
-            </div>
+            <section class="bento-item wide-node">
+                <div class="node-header">[05 // СПЕЦИФИКАЦИЯ]</div>
+                <h3>Монохромная сингулярность</h3>
+                <p>Графика использует исключительно чистые градации серого спектра от #000000 до #FFFFFF. Визуальный объем достигается за счет наложения CSS-фильтра drop-shadow и динамического изменения прозрачности элементов при взаимодействии.</p>
+            </section>
 
-        </div>
+        </main>
     </div>
-        <script src="1.js"></script>
-    <script>
-        
-    </script>
+
+    <script src="1.js"></script>
 </body>
 </html>
