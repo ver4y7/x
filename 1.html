@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Интерактивное Портфолио</title>
+    <link rel="stylesheet" href="1.css">
+    
+
+    <style>
+        
+    </style>
+</head>
+<body>
+
+    <!-- Элементы кастомного курсора -->
+    <div id="custom-cursor"></div>
+    <div id="custom-cursor-blur"></div>
+
+    <div class="container">
+        <!-- Шапка -->
+        <header>
+            <div class="logo">PORTFOLIO.EXE</div>
+            <div style="color: var(--text-muted); font-size: 0.9rem;">ВЕРСИЯ 2026</div>
+        </header>
+
+        <!-- Основная сетка -->
+        <div class="grid-layout">
+            
+            <!-- Карточка 1: Приветствие (Печатный текст) -->
+            <div class="card wide" data-tilt>
+                <div class="card-glow"></div>
+                <h3 class="typing-text" id="typing-hero">Привет, это сайт обо мне</h3>
+                <p>Здесь пока ничего нет, кроме продвинутых интерфейсных решений и визуального отклика на каждое твое действие. Двигай мышь, чтобы активировать физику элементов.</p>
+            </div>
+
+            <!-- Карточка 2: Трекер мыши -->
+            <div class="card" id="motion-card" data-tilt>
+                <div class="card-glow"></div>
+                <h3>Дата-панель</h3>
+                <p>Эта карточка считывает положение твоего курсора в режиме реального времени.</p>
+                <div class="coord-display" id="coords">X: 0 | Y: 0</div>
+            </div>
+
+            <!-- Карточка 3: Раскрывающийся блок (Клик) -->
+            <div class="card high" id="expandable-card">
+                <div class="card-glow"></div>
+                <h3>Раскрывающийся блок</h3>
+                <p>Нажми на кнопку ниже, чтобы изменить структуру сетки и развернуть скрытый контент с плавной CSS-анимацией.</p>
+                <div class="expandable-content">
+                    <p style="color: var(--text-primary);">Скрытая секция успешно инициализирована. Здесь можно разместить подробную информацию, списки навыков или текстовое описание проектов.</p>
+                </div>
+                <button class="expand-btn" id="toggle-btn">Развернуть блок</button>
+            </div>
+
+            <!-- Карточка 4: Магнитный интерактив -->
+            <div class="card">
+                <div class="card-glow"></div>
+                <h3>Магнитный триггер</h3>
+                <p>Кнопка ниже притягивается к курсору, когда ты подводишь его близко.</p>
+                <div class="magnetic-wrap">
+                    <button class="magnetic-button" id="mag-btn">Наведи на меня</button>
+                </div>
+            </div>
+
+            <!-- Карточка 5: Визуализатор кликов -->
+            <div class="card">
+                <div class="card-glow"></div>
+                <h3>Интерактивный эквалайзер</h3>
+                <p>Кликни по этой карточке, чтобы сгенерировать случайные уровни высоты для полос.</p>
+                <div class="bar-container" id="bar-input">
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                </div>
+            </div>
+
+            <!-- Карточка 6: Полноширинный подвал -->
+            <div class="card full" data-tilt>
+                <div class="card-glow"></div>
+                <h3>Минимализм и функционал</h3>
+                <p>Каждый элемент интерфейса реагирует на действия пользователя. Использование полной палитры серых оттенков позволяет сохранить строгий стиль, не перегружая визуальное восприятие цветом, делая акцент исключительно на микро-взаимодействиях.</p>
+            </div>
+
+        </div>
+    </div>
+        <script src="1.js"></script>
+    <script>
+        
+    </script>
+</body>
+</html>
