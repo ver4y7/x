@@ -1,266 +1,278 @@
-/* Базовые настройки и переменные */
-        :root {
-            --bg-main: #0a0a0a;
-            --bg-card: #121212;
-            --bg-card-hover: #1a1a1a;
-            --border-color: #262626;
-            --border-hover: #404040;
-            --text-primary: #ffffff;
-            --text-secondary: #a3a3a3;
-            --text-muted: #525252;
-            --transition-smooth: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-        }
+/* Спецификация монохромных переменных */
+:root {
+    --color-black: #000000;
+    --color-dark-80: #0a0a0a;
+    --color-dark-60: #121212;
+    --color-grey-40: #262626;
+    --color-grey-20: #404040;
+    --color-light-60: #a3a3a3;
+    --color-white: #ffffff;
+    --font-mono: 'Courier New', Courier, monospace;
+}
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            cursor: none; /* Скрываем дефолтный курсор для кастомного */
-        }
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    cursor: none; /* Кастомный ретикул вместо стандартной мыши */
+}
 
-        body {
-            background-color: var(--bg-main);
-            color: var(--text-primary);
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            overflow-x: hidden;
-            min-height: 100vh;
-        }
+body {
+    background-color: var(--color-black);
+    color: var(--color-white);
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
 
-        /* Кастомный интерактивный курсор */
-        #custom-cursor {
-            width: 8px;
-            height: 8px;
-            background: var(--text-primary);
-            border-radius: 50%;
-            position: fixed;
-            pointer-events: none;
-            z-index: 9999;
-            transform: translate(-50%, -50%);
-            transition: width 0.2s, height 0.2s, background-color 0.2s;
-        }
+/* HTML5 Canvas задний план */
+#network-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1;
+    pointer-events: none;
+}
 
-        #custom-cursor-blur {
-            width: 40px;
-            height: 40px;
-            border: 1px solid var(--border-hover);
-            border-radius: 50%;
-            position: fixed;
-            pointer-events: none;
-            z-index: 9998;
-            transform: translate(-50%, -50%);
-            transition: transform 0.1s ease-out, width 0.3s, height 0.3s;
-        }
+/* Фоны и сетки */
+.cyber-grid {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-image: 
+        linear-gradient(to right, rgba(64, 64, 64, 0.1) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(64, 64, 64, 0.1) 1px, transparent 1px);
+    background-size: 40px 40px;
+    z-index: 2;
+    pointer-events: none;
+}
 
-        /* Главный контейнер */
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 40px 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 40px;
-        }
+/* Интерактивный прицел (курсор) */
+#reticle {
+    width: 20px;
+    height: 20px;
+    border: 1px solid var(--color-white);
+    border-radius: 50%;
+    position: fixed;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 9999;
+    transition: width 0.3s, height 0.3s, background-color 0.3s;
+}
 
-        /* Шапка сайта с анимацией появления */
-        header {
-            opacity: 0;
-            transform: translateY(-20px);
-            animation: fadeIn 1s forwards 0.2s;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 20px;
-        }
+.interface-wrapper {
+    position: relative;
+    z-index: 3;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
 
-        .logo {
-            font-size: 1.2rem;
-            font-weight: 700;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            transition: var(--transition-smooth);
-        }
+/* Навигационная панель */
+.nav-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--color-grey-40);
+    padding-bottom: 20px;
+    margin-bottom: 40px;
+    font-family: var(--font-mono);
+}
 
-        .logo:hover {
-            letter-spacing: 6px;
-            color: var(--text-secondary);
-        }
+.sys-logo {
+    font-weight: 800;
+    letter-spacing: 2px;
+}
 
-        /* Сетка Bento Grid */
-        .grid-layout {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-            perspective: 1000px; /* Для 3D эффектов */
-        }
+.sys-status {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.85rem;
+}
 
-        /* Базовый стиль интерактивной карточки */
-        .card {
-            background-color: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 30px;
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            transition: border-color 0.3s, box-shadow 0.3s;
-            transform-style: preserve-3d;
-            transform: translateZ(0);
-        }
+.status-indicator {
+    width: 6px;
+    height: 6px;
+    background-color: var(--color-white);
+    border-radius: 50%;
+    box-shadow: 0 0 8px var(--color-white);
+    animation: pulse 2s infinite;
+}
 
-        .card:hover {
-            border-color: var(--border-hover);
-            box-shadow: 0 10px 30px rgba(255, 255, 255, 0.02);
-        }
+/* Архитектура Bento Grid */
+.bento-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
 
-        /* Интерактивный блик внутри карточки */
-        .card-glow {
-            position: absolute;
-            width: 300px;
-            height: 300px;
-            background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 70%);
-            top: 0;
-            left: 0;
-            pointer-events: none;
-            transform: translate(-50%, -50%);
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
+/* Базовый блок-узел */
+.bento-item {
+    background-color: rgba(10, 10, 10, 0.75);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--color-grey-40);
+    border-radius: 0px; /* Острые углы в стиле исходного сайта */
+    padding: 30px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    transition: border-color 0.4s, box-shadow 0.4s, transform 0.1s;
+}
 
-        .card:hover .card-glow {
-            opacity: 1;
-        }
+.bento-item:hover {
+    border-color: var(--color-white);
+    box-shadow: 0 0 25px rgba(255, 255, 255, 0.05);
+}
 
-        /* Размеры карточек для создания структуры Bento */
-        .card.wide { grid-column: span 2; }
-        .card.high { grid-row: span 2; }
-        .card.full { grid-column: span 3; }
+/* Модификаторы сетки */
+.wide-node { grid-column: span 2; }
+.high-node { grid-row: span 2; }
 
-        /* Элементы внутри карточек */
-        .card h3 {
-            font-size: 1.4rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            transition: transform 0.3s;
-        }
+.node-header {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--color-light-60);
+    letter-spacing: 1px;
+}
 
-        .card:hover h3 {
-            transform: translateZ(20px); /* Выталкивание текста вперед */
-        }
+.glitch-title {
+    font-size: 2.5rem;
+    font-weight: 900;
+    letter-spacing: -1px;
+    line-height: 1.1;
+}
 
-        .card p {
-            font-size: 1rem;
-            color: var(--text-secondary);
-            line-height: 1.6;
-        }
+.node-text {
+    color: var(--color-light-60);
+    line-height: 1.6;
+}
 
-        /* ПРИКОЛ 1: Карточка с раскрытием (Аккордеон) */
-        .expandable-content {
-            max-height: 0;
-            opacity: 0;
-            overflow: hidden;
-            transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
-        }
+/* АНИМАЦИЯ 1: Сканирующая линия на главной карточке */
+.scanner-line {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(to right, transparent, var(--color-white), transparent);
+    opacity: 0.4;
+    animation: scan 4s linear infinite;
+}
 
-        .card.expanded .expandable-content {
-            max-height: 200px;
-            opacity: 1;
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 1px solid var(--border-color);
-        }
+/* АНИМАЦИЯ 2: Функционал динамического развертывания узла */
+.expandable-node {
+    transition: grid-column 0.5s cubic-bezier(0.25, 1, 0.5, 1), all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+}
 
-        .expand-btn {
-            background: none;
-            border: 1px solid var(--border-color);
-            color: var(--text-primary);
-            padding: 10px 20px;
-            border-radius: 8px;
-            align-self: flex-start;
-            margin-top: auto;
-            transition: var(--transition-smooth);
-        }
+.expandable-node.expanded {
+    grid-column: span 2;
+    background-color: var(--color-dark-60);
+}
 
-        .card:hover .expand-btn {
-            border-color: var(--text-primary);
-        }
+.hidden-payload {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: max-height 0.5s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.3s ease;
+}
 
-        /* ПРИКОЛ 2: Магнитная кнопка */
-        .magnetic-wrap {
-            display: inline-block;
-            margin-top: auto;
-        }
+.expandable-node.expanded .hidden-payload {
+    max-height: 300px;
+    opacity: 1;
+    border-top: 1px solid var(--color-grey-40);
+    padding-top: 20px;
+}
 
-        .magnetic-button {
-            background: var(--text-primary);
-            color: var(--bg-main);
-            padding: 15px 30px;
-            border: none;
-            border-radius: 30px;
-            font-weight: 600;
-            transition: transform 0.2s cubic-bezier(0.23, 1, 0.32, 1);
-            display: inline-block;
-        }
+.matrix-data {
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
 
-        /* ПРИКОЛ 3: Эффект печатной машинки */
-        .typing-text::after {
-            content: '|';
-            animation: blink 0.8s infinite;
-        }
+.data-row {
+    display: flex;
+    justify-content: space-between;
+}
 
-        /* ПРИКОЛ 4: Интерактивный счетчик координат */
-        .coord-display {
-            font-family: monospace;
-            background: #161616;
-            padding: 10px;
-            border-radius: 6px;
-            color: var(--text-muted);
-            margin-top: auto;
-        }
+.data-row span:last-child {
+    color: var(--color-light-60);
+}
 
-        /* ПРИКОЛ 5: Интерактивные полосы (Визуализация кликов) */
-        .bar-container {
-            display: flex;
-            gap: 8px;
-            height: 60px;
-            align-items: flex-end;
-            margin-top: 20px;
-        }
+/* Интерактивная кнопка-триггер */
+.action-trigger {
+    background: transparent;
+    border: 1px solid var(--color-grey-20);
+    color: var(--color-white);
+    padding: 12px 24px;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    font-weight: bold;
+    align-self: flex-start;
+    margin-top: auto;
+    transition: all 0.3s ease;
+}
 
-        .bar {
-            flex: 1;
-            background: var(--border-hover);
-            height: 20%;
-            border-radius: 4px;
-            transition: height 0.3s ease, background-color 0.3s;
-        }
+.action-trigger:hover {
+    background-color: var(--color-white);
+    color: var(--color-black);
+    border-color: var(--color-white);
+    box-shadow: 0 0 15px var(--color-white);
+}
 
-        .bar:hover {
-            background: var(--text-primary);
-            height: 100% !important;
-        }
+/* Блок телеметрии */
+.vector-output {
+    font-family: var(--font-mono);
+    font-size: 1.5rem;
+    display: flex;
+    gap: 30px;
+    color: var(--color-white);
+}
 
-        /* Анимации */
-        @keyframes fadeIn {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
+/* Анимация импульсного эквалайзера */
+.impulse-container {
+    display: flex;
+    align-items: flex-end;
+    gap: 6px;
+    height: 100px;
+    margin-top: auto;
+    border-bottom: 1px solid var(--color-grey-40);
+    padding-bottom: 5px;
+}
 
-        @keyframes blink {
-            50% { opacity: 0; }
-        }
+.impulse-bar {
+    flex: 1;
+    height: 10px;
+    background-color: var(--color-grey-20);
+    transition: height 0.6s cubic-bezier(0.25, 1, 0.5, 1), background-color 0.3s;
+}
 
-        /* Адаптивность для мобилок */
-        @media (max-width: 900px) {
-            .grid-layout {
-                grid-template-columns: 1fr;
-            }
-            .card.wide, .card.high, .card.full {
-                grid-column: span 1;
-                grid-row: span 1;
-            }
-        }
+.bento-item:hover .impulse-bar {
+    background-color: var(--color-light-60);
+}
+
+/* Фреймы анимаций */
+@keyframes pulse {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
+}
+
+@keyframes scan {
+    0% { top: 0%; }
+    50% { top: 100%; }
+    100% { top: 0%; }
+}
+
+/* Адаптивный дизайн */
+@media (max-width: 1024px) {
+    .bento-container { grid-template-columns: 1fr; }
+    .wide-node, .high-node, .expandable-node.expanded { grid-column: span 1; grid-row: span 1; }
+}
