@@ -1,150 +1,178 @@
-// 1. Управление кастомным курсором
-        const cursor = document.getElementById('custom-cursor');
-        const cursorBlur = document.getElementById('custom-cursor-blur');
+// ==========================================
+// 1. ИНИЦИАЛИЗАЦИЯ ИНТЕРАКТИВНОГО ГРАФА (CANVAS)
+// ==========================================
+const canvas = document.getElementById('network-canvas');
+const ctx = canvas.getContext('2d');
 
-        document.addEventListener('mousemove', (e) => {
-            cursor.style.left = e.clientX + 'px';
-            cursor.style.top = e.clientY + 'px';
-            
-            // Легкая задержка для внешнего круга
-            cursorBlur.style.left = e.clientX + 'px';
-            cursorBlur.style.top = e.clientY + 'px';
-        });
+let particles = [];
+const mouse = { x: null, y: null, radius: 180 };
 
-        // Эффект увеличения курсора при наведении на кликабельные объекты
-        const interactiveElements = document.querySelectorAll('.card, button, .logo');
-        interactiveElements.forEach(el => {
-            el.addEventListener('mouseenter', () => {
-                cursor.style.width = '20px';
-                cursor.style.height = '20px';
-                cursor.style.backgroundColor = 'rgba(255,255,255,0.2)';
-                cursorBlur.style.width = '60px';
-                cursorBlur.style.height = '60px';
-            });
-            el.addEventListener('mouseleave', () => {
-                cursor.style.width = '8px';
-                cursor.style.height = '8px';
-                cursor.style.backgroundColor = '#ffffff';
-                cursorBlur.style.width = '40px';
-                cursorBlur.style.height = '40px';
-            });
-        });
+function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
 
-        // 2. Интерактивный блик и 3D Наклон карточек (Физика)
-        const cards = document.querySelectorAll('[data-tilt]');
-        
-        cards.forEach(card => {
-            const glow = card.querySelector('.card-glow');
-            
-            card.addEventListener('mousemove', (e) => {
-                const rect = card.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-                
-                // Позиционирование блика
-                glow.style.left = x + 'px';
-                glow.style.top = y + 'px';
+// Объект частицы графа
+class Particle {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.vx = (Math.random() - 0.5) * 0.6;
+        this.vy = (Math.random() - 0.5) * 0.6;
+        this.baseRadius = Math.random() * 1.5 + 1;
+        this.radius = this.baseRadius;
+    }
 
-                // Вычисление наклона (3D эффект)
-                const width = rect.width;
-                const height = rect.height;
-                const rotateX = -(y - height / 2) / 10;
-                const rotateY = (x - width / 2) / 10;
+    draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+        ctx.fill();
+    }
 
-                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(10px)`;
-            });
+    update() {
+        // Стандартное инерционное движение
+        this.x += this.vx;
+        this.y += this.vy;
 
-            card.addEventListener('mouseleave', () => {
-                card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateZ(0)';
-            });
-        });
+        // Отскок от границ экрана
+        if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+        if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
 
-        // Перемещение блика для карточек без 3D-наклона (чтобы отклик оставался)
-        document.querySelectorAll('.card').forEach(card => {
-            if(!card.hasAttribute('data-tilt')) {
-                const glow = card.querySelector('.card-glow');
-                card.addEventListener('mousemove', (e) => {
-                    const rect = card.getBoundingClientRect();
-                    glow.style.left = (e.clientX - rect.left) + 'px';
-                    glow.style.top = (e.clientY - rect.top) + 'px';
-                });
-            }
-        });
+        // Взаимодействие с вектором мыши (магнитный сдвиг)
+        let dx = mouse.x - this.x;
+        let dy = mouse.y - this.y;
+        let distance = Math.hypot(dx, dy);
 
-        // 3. ПРИКОЛ 1: Раскрытие блока по клику
-        const expandCard = document.getElementById('expandable-card');
-        const toggleBtn = document.getElementById('toggle-btn');
+        if (distance < mouse.radius) {
+            const force = (mouse.radius - distance) / mouse.radius;
+            this.x -= dx * force * 0.03;
+            this.y -= dy * force * 0.03;
+            this.radius = this.baseRadius * 2;
+        } else {
+            this.radius = this.baseRadius;
+        }
+    }
+}
 
-        toggleBtn.addEventListener('click', () => {
-            expandCard.classList.toggle('expanded');
-            if(expandCard.classList.contains('expanded')) {
-                toggleBtn.innerText = 'Свернуть блок';
-            } else {
-                toggleBtn.innerText = 'Развернуть блок';
-            }
-        });
+// Создание пула узлов графа
+function initGraph() {
+    particles = [];
+    const density = (canvas.width * canvas.height) / 9000;
+    for (let i = 0; i < Math.min(density, 150); i++) {
+        particles.push(new Particle(Math.random() * canvas.width, Math.random() * canvas.height));
+    }
+}
 
-        // 4. ПРИКОЛ 2: Магнитная кнопка
-        const magBtn = document.getElementById('mag-btn');
-        const magWrap = magBtn.parentElement;
+// Отрисовка линий связи между узлами (алгоритм Hashgraph)
+function connectNodes() {
+    let maxDistance = 120;
+    for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+            let dx = particles[i].x - particles[j].x;
+            let dy = particles[i].y - particles[j].y;
+            let distance = Math.hypot(dx, dy);
 
-        magWrap.addEventListener('mousemove', (e) => {
-            const rect = magBtn.getBoundingClientRect();
-            const x = e.clientX - (rect.left + rect.width / 2);
-            const y = e.clientY - (rect.top + rect.height / 2);
-            
-            // Движение кнопки в сторону курсора на 40% от расстояния
-            magBtn.style.transform = `translate(${x * 0.4}px, ${y * 0.4}px)`;
-        });
-
-        magWrap.addEventListener('mouseleave', () => {
-            magBtn.style.transform = 'translate(0px, 0px)';
-        });
-
-        // 5. ПРИКОЛ 3: Эффект печатной машинки для заголовка
-        const textEl = document.getElementById('typing-hero');
-        const textString = textEl.innerText;
-        textEl.innerText = '';
-        let index = 0;
-
-        function type() {
-            if (index < textString.length) {
-                textEl.innerText += textString.charAt(index);
-                index++;
-                setTimeout(type, 80);
+            if (distance < maxDistance) {
+                // Изменение прозрачности линий в зависимости от дальности связи
+                let alpha = (1 - (distance / maxDistance)) * 0.15;
+                ctx.strokeStyle = `rgba(255, 255, 255, ${alpha})`;
+                ctx.lineWidth = 0.8;
+                ctx.beginPath();
+                ctx.moveTo(particles[i].x, particles[i].y);
+                ctx.lineTo(particles[j].x, particles[j].y);
+                ctx.stroke();
             }
         }
-        setTimeout(type, 500);
+    }
+}
 
-        // 6. ПРИКОЛ 4: Вывод координат мыши внутри карточки
-        const motionCard = document.getElementById('motion-card');
-        const coordsDisplay = document.getElementById('coords');
+// Цикл рендеринга
+function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach(p => {
+        p.update();
+        p.draw();
+    });
+    connectNodes();
+    requestAnimationFrame(animate);
+}
 
-        motionCard.addEventListener('mousemove', (e) => {
-            const rect = motionCard.getBoundingClientRect();
-            const x = Math.floor(e.clientX - rect.left);
-            const y = Math.floor(e.clientY - rect.top);
-            coordsDisplay.innerText = `X: ${x} | Y: ${y}`;
-            coordsDisplay.style.color = 'var(--text-primary)';
-        });
+initGraph();
+animate();
 
-        motionCard.addEventListener('mouseleave', () => {
-            coordsDisplay.style.color = 'var(--text-muted)';
-        });
+// ==========================================
+// 2. СЛЕЖЕНИЕ ЗА КУРСОРOM И ТЕЛЕМЕТРИЯ
+// ==========================================
+const reticle = document.getElementById('reticle');
+const vecX = document.getElementById('vec-x');
+const vecY = document.getElementById('vec-y');
 
-        // 7. ПРИКОЛ 5: Интерактивный эквалайзер (изменение высоты по клику)
-        const barInputCard = document.getElementById('bar-input').parentElement;
-        const bars = document.querySelectorAll('.bar');
+window.addEventListener('mousemove', (e) => {
+    mouse.x = e.clientX;
+    mouse.y = e.clientY;
 
-        function randomizeBars() {
-            bars.forEach(bar => {
-                const heightPercent = Math.floor(Math.random() * 75) + 25; // от 25% до 100%
-                bar.style.height = heightPercent + '%';
-            });
-        }
+    // Плавное следование кастомного прицела
+    reticle.style.left = `${e.clientX}px`;
+    reticle.style.top = `${e.clientY}px`;
 
-        // Инициализация начальных высот
-        randomizeBars();
+    // Вычисление отклонения от центра экрана для блока телеметрии
+    let centerX = window.innerWidth / 2;
+    let centerY = window.innerHeight / 2;
+    vecX.innerText = ((e.clientX - centerX) / centerX).toFixed(2);
+    vecY.innerText = ((centerY - e.clientY) / centerY).toFixed(2);
+});
 
-        // Изменение по клику на карточку
-        barInputCard.addEventListener('click', randomizeBars);
+// Отклик прицела при наведении на интерактивные узлы
+document.querySelectorAll('.bento-item, .action-trigger').forEach(item => {
+    item.addEventListener('mouseenter', () => {
+        reticle.style.width = '40px';
+        reticle.style.height = '40px';
+        reticle.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+    });
+    item.addEventListener('mouseleave', () => {
+        reticle.style.width = '20px';
+        reticle.style.height = '20px';
+        reticle.style.backgroundColor = 'transparent';
+    });
+});
+
+// ==========================================
+// 3. ФУНКЦИОНАЛ РАЗВЕРТЫВАНИЯ УЗЛА (КЛИК)
+// ==========================================
+const terminalNode = document.getElementById('terminal-node');
+const triggerExpand = document.getElementById('trigger-expand');
+const telemetryStatus = document.getElementById('telemetry-status');
+
+triggerExpand.addEventListener('click', () => {
+    terminalNode.classList.toggle('expanded');
+    
+    if (terminalNode.classList.contains('expanded')) {
+        triggerExpand.innerText = 'СВЕРНУТЬ МОДУЛЬ';
+        telemetryStatus.innerText = 'STATUS: CONFIG_MOD_ACTIVE';
+    } else {
+        triggerExpand.innerText = 'РАЗВЕРНУТЬ УЗЕЛ';
+        telemetryStatus.innerText = 'STATUS: OPERATIONAL';
+    }
+});
+
+// ==========================================
+// 4. ИМПУЛЬСНЫЙ АНАЛИЗАТОР (ЧАСТОТНЫЙ МОНИТОР)
+// ==========================================
+const matrixNode = document.getElementById('matrix-node');
+const bars = document.querySelectorAll('.impulse-bar');
+
+function triggerImpulse() {
+    bars.forEach(bar => {
+        const targetHeight = Math.floor(Math.random() * 90) + 10;
+        bar.style.height = `${targetHeight}%`;
+    });
+}
+
+// Первичная генерация уровней
+triggerImpulse();
+
+// Генерация новой волны высот при клике по карточке
+matrixNode.addEventListener('click', triggerImpulse);
